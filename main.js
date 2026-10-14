@@ -1,4 +1,4 @@
-/*HS:52e411eb71*/
+/*HS:dee86b0633*/
 
 /* ===== ПРИНУДИТЕЛЬНЫЙ ГОРИЗОНТАЛЬНЫЙ РЕЖИМ: если приложение держит экран вертикально, игра сама поворачивается на 90° ===== */
 let ROT=0;const ROOT=document.createElement('div');ROOT.id='root';
@@ -241,15 +241,15 @@ function aboutDraw(now){const sc=$('#about');if(!sc.classList.contains('on')){ab
  const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);g.imageSmoothingQuality='high';const t=now/1000,gy=h*.97,k=h/360;
  const sh=(x,r)=>{g.fillStyle='rgba(0,0,0,.45)';g.beginPath();g.ellipse(x,gy,r,r*.18,0,0,7);g.fill()};
  const mi=SP.mouse.idle;if(mi&&mi.img.complete&&mi.img.naturalWidth){const x=w*.13;sh(x,48*k);g.save();g.translate(x,gy);const s=K*1.55*k;g.scale(s,s);blit(g,mi,Math.floor(t*mi.m.fps)%mi.m.n);g.restore()}
- const ki=typeof KRS!=='undefined'&&KRS.idle;if(ki&&ki.img.complete&&ki.img.naturalWidth){const m=ki.m,x=w*.87,s=KH*(m.k||1)*1.45*k,fi=Math.floor(t*2)%m.n;sh(x,44*k);
-  g.save();g.translate(x,gy);g.scale(-s,s);g.drawImage(ki.img,(fi%m.cols)*m.cw,Math.floor(fi/m.cols)*m.ch,m.cw,m.ch,-m.ax,-m.ay,m.cw,m.ch);g.restore()}}
+ const mi2=SP.manul&&SP.manul.idle;if(mi2&&mi2.img.complete&&mi2.img.naturalWidth){const x=w*.87,s=K*MS*1.25*k,br=1+.012*Math.sin(t*2.2);sh(x,52*k);
+  g.save();g.translate(x,gy);g.scale(s,s*br);blit(g,mi2,0);g.restore()}}
 function show(id){
  $$('.scr').forEach(s=>s.classList.toggle('on',s.id===id));
  if(id!=='mgp'&&typeof mgraf!=='undefined'){cancelAnimationFrame(mgraf);MG=null}
  if(id!=='game'){if(typeof dRelease==='function'){dRelease();bvRelease()}cancelAnimationFrame(raf);if(typeof cutStop==='function')cutStop();SFX.stopLose();if(started)SFX.music('music_menu')}
  cancelAnimationFrame(mraf);if(id==='start'){dailyShow();mloop();if(started)mv.play().catch(()=>{})}else mv.pause();
  cancelAnimationFrame(maprf);if(id==='map'){buildMap();mapStart();diffLbl()}
- if(typeof glUpd==='function')glUpd();if(id==='about'&&GIFT)$('#albbtn').classList.add('on');if(id==='about'){const ab=$('#about');if(BGI.bg_about&&!ab.dataset.bg){ab.dataset.bg=1;ab.style.backgroundImage='url('+BGI.bg_about.src+')'}if(!abRaf)abRaf=requestAnimationFrame(aboutDraw)}
+ if(typeof glUpd==='function')glUpd();if(id==='about'&&GIFT)$('#albbtn').classList.add('on');if(id==='about'){const ad=$('#adaily');if(ad){if(GIFT&&DAILY.length){const day=Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);ad.innerHTML='<small>Комплимент дня</small>'+DAILY[day%DAILY.length];ad.classList.add('on')}else ad.classList.remove('on')}const ab=$('#about');if(BGI.bg_about&&!ab.dataset.bg){ab.dataset.bg=1;ab.style.backgroundImage='url('+BGI.bg_about.src+')'}if(!abRaf)abRaf=requestAnimationFrame(aboutDraw)}
 }
 /* ===== КАРТА: отметки пройденных точек и мышь, которая идёт от точки к точке ===== */
 const LV_OPEN=1; /* ТЕСТ: все уровни открыты в «Выборе уровня». Для подарка поставить 0 */
@@ -461,9 +461,9 @@ function upd(dt){
  else if(e.a==='vanish'){if(e.at<=0)set(e,'hidden',rnd(.7,1.2))}  /* тень рассыпается */
  else if(e.a==='hidden'){if(e.at<=0){                                  /* и собирается рядом с мышью */
   let sd=Math.random()<.5?1:-1,nx=p.x+sd*95;if(nx<40||nx>W-40){sd=-sd;nx=p.x+sd*95}
-  e.x=Math.max(40,Math.min(W-40,nx));e.f=p.x>e.x?-1:1;set(e,'appear',SHA);SFX.shRet()}} /* в ролике удар назад: тень появляется спиной к мыши и бьёт обратным хватом */
+  e.x=Math.max(40,Math.min(W-40,nx));e.f=p.x>e.x?1:-1;set(e,'appear',SHA);SFX.shRet()}} /* в ролике удар назад: тень появляется спиной к мыши и бьёт обратным хватом */
  else if(e.a==='appear'){
-  if(!e.hd&&e.st>.55&&e.st<.88&&(p.x-e.x)*e.f<20&&Math.abs(p.x-e.x)<135&&Math.abs(p.y)<70){e.hd=1;hurtP(b.dmg*1.3)}
+  if(!e.hd&&e.st>.55&&e.st<.88&&(p.x-e.x)*e.f>-20&&Math.abs(p.x-e.x)<135&&Math.abs(p.y)<70){e.hd=1;hurtP(b.dmg*1.3)}
   if(e.at<=0){mode(e,'idle');e.cd=b.cd+.3}}
  else if(e.a==='wind'){if(b.id==='man'&&!e.ws&&e.st>=e.w-.24){e.ws=1;SFX.eswing()}if(e.at<=0){if(e.k==='spin'){set(e,'spin',.55);e.f=d>0?1:-1}else set(e,'atk',b.atkT||.3)}}
  else if(e.a==='atk'){
@@ -483,7 +483,7 @@ function upd(dt){
  }
  phys(e,dt);
  $('#pb').style.width=p.hp+'%';
- $$('#bb i').forEach((x,j)=>x.style.width=(j<e.bar?0:j===e.bar?e.hp/b.hp*100:100)+'%');
+ $$('#bb i').forEach((x,j)=>x.style.width=(j<e.bar?0:j===e.bar?((e.a==='down'||e.a==='rise')&&e.hp<=0?100:e.hp/b.hp*100):100)+'%');
 }
 /* щит босса: настоящий щит, полупрозрачный, со свечением цвета босса */
 const SHC={mouse:'#ff5aa8',mac:'#ffc830',ora:'#b050ff',bus:'#ff2a3a',man:'#3a8cff',shd:'#000000'},SHT={};
@@ -542,7 +542,7 @@ function hitE(dmg,src){
 }
 function hurtP(dm){
  const g=G,p=g.p,e=g.e;if(p.inv>0||g.end)return;dm*=DF().dm*BSTV(g.b.id,'dm');
- const big=dm>=10,bk=p.a==='block'&&(e.x-p.x)*p.f>0;SFX.heroHurt(bk,big,g.b.id==='shd');if(bk){dm*=.1;p.x-=p.f*6}else{set(p,'hurt',.3);
+ const big=dm>=10,bk=p.a==='block';SFX.heroHurt(bk,big,g.b.id==='shd');if(bk){dm*=.1;p.x+=(p.x<e.x?-1:1)*6}else{set(p,'hurt',.3);
   if(g.b.id==='man'&&!g.b.vid){const s=p.x>=e.x?1:-1;p.vy=-430;p.y=Math.min(p.y,-1);p.kv=s*(W/5)/.57*.76;set(p,'hurt',.55)}}
  fxHit(g,p.x+(e.x-p.x)*.35,GY+p.y-55,e.f,big?2:1,bk,1);
  p.hp=Math.max(0,p.hp-dm);p.fl=.12;
@@ -1086,13 +1086,13 @@ function dStart(g){
  lastOK=0;
  g.dg={ph:1,a:'idle',t:0,cd:2.2,cracks:[],dust:[],flames:[],dead:0,cur:null,prev:null,xf:0,x:0,mir:0,want:0};dPlay(g.dg,'idle1',0);
  g.kry=null;g.aura=0;g.saved=0;SFX.music('mA')}
-function dAct(d,a,mir){d.a=a;d.t=0;d.bfb=0;d.vt=0;d.stall=0;d.lvt=-1;d.hit=0;d.held=0;d.hdone=0;d.fs=0;
+function dAct(d,a,mir){d.a=a;d.rate=1;d.t=0;d.bfb=0;d.vt=0;d.stall=0;d.lvt=-1;d.hit=0;d.held=0;d.hdone=0;d.fs=0;
  const P2=d.ph===2?'2':'1';
  if(a==='idle')dPlay(d,'idle'+P2,0);else if(a==='slam')dPlay(d,'slam'+P2,mir);else if(a==='breath')dPlay(d,'breath'+P2,0);
  else if(a==='hurt')dPlay(d,'hurt'+P2,0);else if(a==='trans')dPlay(d,'trans',0);else if(a==='death')dPlay(d,'death',0)}
 function dSync(g){
  const d=g.dg;if(!d)return;const v=DV[d.cur];if(!v)return;
- if(g.pause||d.held&&!d.hdone){if(!v.paused)v.pause()}else{if(v.paused&&!dEnded(d))v.play().catch(()=>{});v.playbackRate=g.sl>0?.3:1}}
+ if(g.pause||d.held&&!d.hdone){if(!v.paused)v.pause()}else{if(v.paused&&!dEnded(d))v.play().catch(()=>{});v.playbackRate=g.sl>0?.3:(d.rate||1)}}
 function dUpd(g,dt){
  const d=g.dg,p=g.p,ph=d.ph;d.t+=dt;d.xf-=dt;dSync(g);
  if(d.xf<=0&&d.prev){const pv=DV[d.prev];if(pv&&d.prev!==d.cur){try{pv.pause();pv.currentTime=0}catch(e){}}d.prev=null}
@@ -1106,21 +1106,24 @@ function dUpd(g,dt){
   if(!(g.kill||g.resq&&!g.resq.done||g.end)){ /* плывёт к мыши */
    const tx=cl((p.x-W/2)*.75,-MX,MX),dx=tx-d.x;d.x+=Math.sign(dx)*Math.min(Math.abs(dx),(ph===1?32:46)*dt)}
   if(g.kill||g.resq&&!g.resq.done||g.end)break;
-  d.cd-=dt/(DF().cd*BSTV('inf','cd'));if(d.cd<=0&&SFX.vBusy()<.25)d.want=1;
+  d.cd-=dt/(DF().cd*BSTV('inf','cd'));if(d.cd<=0&&SFX.vBusy()<.25)d.want=1;d.rate=d.want?2.4:1;
   /* атака начинается только из стартовой позы — в момент, когда цикл покоя вернулся к началу */
   if(d.want&&(wrap||ct<.05)){d.want=0;
    if(ph===2&&!g.saved){d.doom=1;dAct(d,'slam',p.x<DXp());d.zone={x0:0,x1:W,t:0};break}
    d.doom=0;
-   if(Math.random()<.5){const m=p.x<DXp(),c=DXp()+(m?-SLX:SLX);dAct(d,'slam',m);d.zone={x0:c-SLW,x1:c+SLW,t:0}}
+   /* чередование: не больше двух одинаковых атак подряд, после повтора чаще другая */
+   const kind=d.rep>=2?(d.last==='slam'?'breath':'slam'):(Math.random()<(d.last==='slam'?.3:d.last==='breath'?.7:.5)?'slam':'breath');
+   d.rep=kind===d.last?(d.rep||1)+1:1;d.last=kind;
+   if(kind==='slam'){const m=p.x<DXp(),c=DXp()+(m?-SLX:SLX);dAct(d,'slam',m);d.zone={x0:c-SLW,x1:c+SLW,t:0}}
    else{dAct(d,'breath');d.zone={x0:DXp()-FZ,x1:DXp()+FZ,t:0}}}
   break}
- case 'slam':
+ case 'slam':d.rate=1.3;
   if(d.zone)d.zone.t+=dt;
   if(!d.hit&&ct>=DT.slam.hit){d.hit=1;if(d.zone)d.zone.done=1;dImpact(g,d)}
   if(d.hit&&ct>=DT.slam.up)d.zone=null;
-  if(dEnded(d)){d.zone=null;dAct(d,'idle');d.cd=ph===1?.6:.2}
+  if(dEnded(d)){d.zone=null;dAct(d,'idle');d.rate=1;d.cd=ph===1?.35:.1}
   break;
- case 'breath':
+ case 'breath':d.rate=ph===1?1.3:1.15;
   if(d.zone)d.zone.t+=dt;
   if(ph===1){ /* замирает с открытой пастью, пока бьёт огонь */
    if(!d.held&&ct>=DT.breath1.hold){d.held=1;d.ht=0;SFX.fx('d_fire',.9);g.sh=DT.breath1.dur;g.sa=2.5;dSync(g)}
@@ -1129,9 +1132,9 @@ function dUpd(g,dt){
    if(!d.bfb&&d.stall>.5&&ct<T.f1){d.bfb=1;d.bt=ct;dPlay(d,'idle2',d.mir);d.stall=0}
    const bt=d.bfb?(d.bt+=dt):ct;
    if(d.bfb){if(bt>=T.f0&&bt<T.f1){if(!d.fs){d.fs=1;SFX.fx('d_fire',.9);g.sh=.75;g.sa=3}emitFire(g,d,dt,.6);fireHit(g,d,dt)}else if(bt>=T.f1)d.zone=null;
-    if(bt>=T.f1+.5){d.bfb=0;d.zone=null;dAct(d,'idle');d.cd=.25}break}
+    if(bt>=T.f1+.5){d.bfb=0;d.zone=null;dAct(d,'idle');d.rate=1;d.cd=.15}break}
    if(ct>=T.f0&&ct<T.f1){if(!d.fs){d.fs=1;SFX.fx('d_fire',.9);g.sh=.75;g.sa=3}emitFire(g,d,dt,.6);fireHit(g,d,dt)}else if(ct>=T.f1)d.zone=null}
-  if(dEnded(d)){d.zone=null;dAct(d,'idle');d.cd=ph===1?.7:.25}
+  if(dEnded(d)){d.zone=null;dAct(d,'idle');d.rate=1;d.cd=ph===1?.4:.15}
   break;
  case 'hurt':if(dEnded(d)){dAct(d,'idle');d.cd=Math.max(d.cd,.4)}break;
  case 'trans':if(dEnded(d)){d.ph=2;['idle1','slam1','breath1'].forEach(k=>{const v=DV[k];if(v){try{v.pause()}catch(e){}}});dAct(d,'idle');d.cd=.6;g.sh=.4;g.sa=6;ban('Это была только разминка')}break;
@@ -1449,7 +1452,7 @@ function vbUpd(g,dt){
     e.stp=st}}
   else{e.a='idle';vbClip(e,'idle',1)}
   if(e.cd<=0){
-   if(id==='mac'){if(ad>240&&Math.random()<.65)vbAct(g,'jump');else if(ad<=200)vbAct(g,Math.random()<.75?'atk':'jump')}
+   if(id==='mac'){if(ad>140){if(Math.random()<.85)vbAct(g,'jump')}else vbAct(g,Math.random()<.5?'atk':'jump')}
    else if(id==='ora'){const nx=e.la==='cards'?'spin':'cards';if(nx==='spin'&&ad>300)e.cd=.25;else{e.la=nx;vbAct(g,nx)}}
    else if(id==='bus'){if(ad<=150)vbAct(g,Math.random()<.5?'combo':'lunge');else if(ad<=W*.65&&Math.random()<.8)vbAct(g,'lunge');else e.cd=.3}
   }
