@@ -4,13 +4,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Рыцарь-Мышь">
+<meta name="apple-mobile-web-app-title" content="Legend of Mouse">
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.json?v=1791999064">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png?v=1791999064">
 <link rel="apple-touch-icon-precomposed" sizes="180x180" href="icon-180.png?v=1791999064">
 <link rel="icon" href="icon-512.png">
-<title>Рыцарь-Мышь</title>
+<title>Legend of Mouse</title>
 <style>
 :root{--vw:1vw;--vh:1vh;--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--f:"Gothic",Georgia,"Times New Roman",serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;outline:none}
@@ -261,7 +261,7 @@ html.rot #root{transform-origin:0 0;transform:rotate(90deg) translateY(-100%);ov
   for(let i=0;i<3;i++){const a=((t*3+i/3)%1);g.globalAlpha=.25*(1-a);g.fillStyle='#8a6a50';g.beginPath();g.arc(hx-M.ax*k*.6-a*80,gy-4-a*14,6+a*14,0,7);g.fill()}g.globalAlpha=1;
   if(H.complete&&H.naturalWidth)g.drawImage(H,fi*M.cw,0,M.cw,M.ch,hx-M.ax*k,gy-M.ay*k-bob,M.cw*k,M.ch*k);
   /* название и полоса загрузки */
-  g.textAlign='center';g.fillStyle='#f3d79a';g.shadowColor='#000';g.shadowBlur=12;g.font='600 '+Math.round(Math.min(w,h)*.085)+'px Georgia,serif';g.fillText('Рыцарь-Мышь',w/2,h*.17);g.shadowBlur=0;
+  g.textAlign='center';g.fillStyle='#f3d79a';g.shadowColor='#000';g.shadowBlur=12;g.font='600 '+Math.round(Math.min(w,h)*.085)+'px Georgia,serif';g.fillText('Legend of Mouse',w/2,h*.17);g.shadowBlur=0;
   const bw=Math.min(w*.5,420),bx=w/2-bw/2,by=h*.93,p=ready?1:Math.min(.99,done/TOT);
   g.fillStyle='rgba(255,255,255,.12)';g.fillRect(bx,by,bw,4);gr=g.createLinearGradient(bx,0,bx+bw,0);gr.addColorStop(0,'#b0782a');gr.addColorStop(1,'#ffd27a');g.fillStyle=gr;g.fillRect(bx,by,bw*p,4);
   g.font=Math.round(Math.min(w,h)*.04)+'px Georgia,serif';
