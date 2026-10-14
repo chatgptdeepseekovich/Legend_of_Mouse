@@ -1,5 +1,5 @@
 /* офлайн: оболочка сайта из кэша; части игры кладёт в кэш сам загрузчик */
-const SH='lom-shell-1792006575',FILES=['./','index.html','manifest.json','icon-180.png','icon-512.png'];
+const SH='lom-shell-1792010227',FILES=['./','index.html','manifest.json','icon-180.png','icon-512.png'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(SH).then(c=>c.addAll(FILES)).catch(()=>{}))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('lom-shell-')&&k!==SH).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;

@@ -1,4 +1,4 @@
-/*HS:dee86b0633*/
+/*HS:8cef1ddc63*/
 
 /* ===== ПРИНУДИТЕЛЬНЫЙ ГОРИЗОНТАЛЬНЫЙ РЕЖИМ: если приложение держит экран вертикально, игра сама поворачивается на 90° ===== */
 let ROT=0;const ROOT=document.createElement('div');ROOT.id='root';
@@ -128,7 +128,7 @@ const SFX=(()=>{
 ['pointerdown','pointerup','touchend','keydown'].forEach(t=>document.addEventListener(t,()=>SFX.unlock(),{capture:true,passive:true}));
 
 /* ===== ЗАЩИТА ОТ ВЫДЕЛЕНИЯ, ЗУМА, КОНТЕКСТНОГО МЕНЮ ===== */
-['contextmenu','selectstart','dragstart','gesturestart','gesturechange','dblclick'].forEach(t=>document.addEventListener(t,e=>{if(e.target&&e.target.closest&&e.target.closest('input'))return;e.preventDefault()},{passive:false}));
+['contextmenu','selectstart','dragstart','gesturestart','gesturechange','dblclick'].forEach(t=>document.addEventListener(t,e=>{if(e.target&&e.target.closest&&e.target.closest('input,textarea'))return;e.preventDefault()},{passive:false}));
 let scY=null,scEl=null;   /* в повёрнутом режиме прокрутку списков ведём сами: свайп по экрану → сдвиг по игре */
 document.addEventListener('touchstart',e=>{scEl=ROT?e.target.closest('.scrl'):null;if(scEl)scY=TY(e.touches[0])},{passive:true,capture:true});
 document.addEventListener('touchmove',e=>{const el=e.target.closest('.scrl');
@@ -243,6 +243,21 @@ function aboutDraw(now){const sc=$('#about');if(!sc.classList.contains('on')){ab
  const mi=SP.mouse.idle;if(mi&&mi.img.complete&&mi.img.naturalWidth){const x=w*.13;sh(x,48*k);g.save();g.translate(x,gy);const s=K*1.55*k;g.scale(s,s);blit(g,mi,Math.floor(t*mi.m.fps)%mi.m.n);g.restore()}
  const mi2=SP.manul&&SP.manul.idle;if(mi2&&mi2.img.complete&&mi2.img.naturalWidth){const x=w*.87,s=K*MS*1.25*k,br=1+.012*Math.sin(t*2.2);sh(x,52*k);
   g.save();g.translate(x,gy);g.scale(s,s*br);blit(g,mi2,0);g.restore()}}
+/* ===== СОХРАНЕНИЕ: перенос прогресса кодом (на новый ярлык или другой телефон) ===== */
+function saveKeys(){const o={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^(mk_|lom_code)/.test(k))o[k]=localStorage.getItem(k)}}catch(e){}return o}
+function saveCode(){const s=JSON.stringify({v:1,t:Date.now(),d:saveKeys()});let b='';new TextEncoder().encode(s).forEach(c=>b+=String.fromCharCode(c));return 'LOM1-'+btoa(b)}
+function saveLoad(code){code=String(code||'').replace(/\s+/g,'');if(!code.startsWith('LOM1-'))return false;
+ try{const bin=atob(code.slice(5)),u=Uint8Array.from(bin,c=>c.charCodeAt(0)),o=JSON.parse(new TextDecoder().decode(u));if(!o||!o.d||typeof o.d!=='object')return false;
+  for(const k in o.d)if(/^(mk_|lom_code)/.test(k))localStorage.setItem(k,String(o.d[k]));return true}catch(e){return false}}
+function saveUI(){if($('#saveov'))return;const o=document.createElement('div');o.id='saveov';const code=saveCode();
+ o.innerHTML='<div class="sbox"><h3>Сохранение прогресса</h3><p>Скопируй этот код и сохрани (например, в Заметки). Его можно вставить на новом ярлыке или другом телефоне — вернутся боссы, титулы, рекорды и Славики.</p>'+
+ '<textarea id="svout" readonly></textarea><div class="row"><button id="svcopy">Скопировать код</button>'+(navigator.share?'<button id="svshare">Отправить…</button>':'')+'</div>'+
+ '<h3>Загрузить прогресс</h3><p>Вставь сохранённый код. Текущий прогресс заменится.</p><textarea id="svin" placeholder="LOM1-…"></textarea><div class="row"><button id="svload">Загрузить</button><button id="svclose">Закрыть</button></div><div id="svmsg"></div></div>';
+ document.body.appendChild(o);const out=$('#svout'),msg=$('#svmsg');out.value=code;
+ $('#svcopy').onclick=()=>{const ok=()=>msg.textContent='Код скопирован';try{navigator.clipboard.writeText(code).then(ok,()=>{out.select();document.execCommand('copy');ok()})}catch(e){out.select();try{document.execCommand('copy');ok()}catch(_){msg.textContent='Выдели код и скопируй вручную'}}};
+ if($('#svshare'))$('#svshare').onclick=()=>navigator.share({title:'Legend of Mouse — сохранение',text:code}).catch(()=>{});
+ $('#svload').onclick=()=>{if(saveLoad($('#svin').value)){msg.textContent='Прогресс загружен, перезапускаю…';setTimeout(()=>location.reload(),900)}else{msg.style.color='#ff9aa8';msg.textContent='Код не подошёл. Проверь, что он скопирован целиком'}};
+ $('#svclose').onclick=()=>o.remove()}
 function show(id){
  $$('.scr').forEach(s=>s.classList.toggle('on',s.id===id));
  if(id!=='mgp'&&typeof mgraf!=='undefined'){cancelAnimationFrame(mgraf);MG=null}
@@ -752,20 +767,12 @@ function draw(){
 /* ===== РОЛИКИ ФИНАЛЬНОГО УДАРА: вспышка → ролик на весь экран (пропуск касанием) → «Победа!» =====
    snd — звуки по времени ролика: [секунда, звук, громкость] */
 const CUTS={
- cut_man:[ /* d — длительность кадра, z — наезд камеры (от→до), f — точка, на которую наезжаем, fl — белая вспышка, sh — тряска, s — звук */
-  {d:.75,z:[1,1.07],f:[.5,.45]},
-  {d:.7,z:[1.12,1.2],f:[.33,.55],fl:1,sh:9,s:['m_block',.8]},
-  {d:.42,z:[1.05,1.12],f:[.25,.5],s:['sw_h',.6]},
-  {d:.62,z:[1.15,1.26],f:[.45,.55],fl:1,sh:14,s:['m_punch',.95]},
-  {d:.68,z:[1.1,1.03],f:[.6,.6],sh:7,s:['e_punch',.7]},
-  {d:1.25,z:[1,1.05],f:[.5,.55]}],
+ cut_man:[ /* d — длительность кадра, z — наезд камеры, f — точка наезда, fl — вспышка, sh — тряска, s — звук; v — ролик, ev — события ролика [t,звук,громк,вспышка,тряска] */
+  {d:4.5,v:'cut_man',z:[1,1.04],f:[.5,.5],ev:[[.9,'sw_l',.5],[1.46,'m_block',.8,1,9],[2.45,'sw_h',.6],[2.83,'m_punch',.95,1,14],[3.3,'e_punch',.7,0,7]]},
+  {d:1.1,z:[1.04,1.08],f:[.5,.55]}],
  cut_shd:[
-  {d:.6,z:[1,1.06],f:[.3,.45],s:['sw_l',.5]},
-  {d:.55,z:[1.06,1.14],f:[.45,.35],s:['sw_h',.6]},
-  {d:.62,z:[1.15,1.25],f:[.5,.5],fl:1,sh:12,s:['m_punch',.9]},
-  {d:.5,z:[1.1,1.16],f:[.5,.5],sh:5,s:['sh_hide',.55]},
-  {d:.55,z:[1.06,1.1],f:[.45,.6]},
-  {d:1.25,z:[1,1.04],f:[.45,.62]}],
+  {d:3.79,v:'cut_shd',z:[1,1.04],f:[.5,.5],ev:[[.45,'sw_l',.5],[.95,'sw_h',.6],[2.1,'m_punch',.9,1,12],[2.2,'sh_hide',.55,0,5]]},
+  {d:1.1,z:[1.04,1.08],f:[.45,.6]}],
  cut_mac:[
   {d:.9,z:[1,1.07],f:[.3,.6],s:['sw_l',.5]},
   {d:.95,z:[1.04,1.16],f:[.5,.25],s:['sw_h',.7]},
@@ -783,22 +790,23 @@ const CV={};for(const k in CVID){const v=document.createElement('video');v.muted
 const cutc=$('#cutc'),cutx=cutc.getContext('2d');let CUT=null,cutraf=0;const CUTI={};
 function cutPrep(k){if(!CUTI[k]&&CUTF[k])CUTI[k]=CUTF[k].map(d=>{if(!d)return null;const im=new Image();im.src=b2u(d,'image/webp');return im});
  (CUTS[k]||[]).forEach(P=>{const v=P.v&&CV[P.v];if(v){v.play().then(()=>{if(!(CUT&&CUTS[CUT.k][CUT.i]===P)){v.pause();try{v.currentTime=0}catch(e){}}}).catch(()=>{})}})}
-function cutPlay(k,done){if(!G)return;cutPrep(k);CUT={k,done,t:0,i:-1,end:0,l:0,tot:CUTS[k].reduce((s,p)=>s+p.d,0)};$('#cut').classList.add('on');
+function cutPlay(k,done){if(!G)return;cutPrep(k);CUT={k,done,t:0,i:-1,end:0,l:0,ef:{},flT:-9,shT:-9,shA:0,tot:CUTS[k].reduce((s,p)=>s+p.d,0)};$('#cut').classList.add('on');
  cancelAnimationFrame(cutraf);cutraf=requestAnimationFrame(cutLoop)}
 function cutLoop(now){cutraf=requestAnimationFrame(cutLoop);if(!CUT)return;const dt=Math.min((now-(CUT.l||now))/1000,.05);CUT.l=now;CUT.t+=dt;
  const d=Math.min(devicePixelRatio||1,3),w=Math.round(vW()*d),h=Math.round(vH()*d);if(cutc.width!==w||cutc.height!==h){cutc.width=w;cutc.height=h}
  const g=cutx,sq=CUTS[CUT.k],ims=CUTI[CUT.k]||[];let acc=0,i=0;while(i<sq.length-1&&CUT.t>=acc+sq[i].d){acc+=sq[i].d;i++}
  const p=sq[i],pt=CUT.t-acc;if(i!==CUT.i){CUT.i=i;if(p.s)SFX.fx(p.s[0],p.s[1]);const v=p.v&&CV[p.v];if(v){try{v.currentTime=0}catch(e){}v.play().catch(()=>{})}}
+ if(p.ev){const v=p.v&&CV[p.v],vt=v&&!v.paused&&v.currentTime>0?v.currentTime:pt;p.ev.forEach((e,n)=>{const id=i+'_'+n;if(vt>=e[0]&&!CUT.ef[id]){CUT.ef[id]=1;if(e[1])SFX.fx(e[1],e[2]);if(e[3])CUT.flT=CUT.t;if(e[4]){CUT.shT=CUT.t;CUT.shA=e[4]}}})}
  g.setTransform(1,0,0,1,0,0);g.fillStyle='#000';g.fillRect(0,0,w,h);
  const panel=(j,q,al)=>{const P=sq[j];let im=ims[j];
    if(P.v){const v=CV[P.v];if(v&&v.readyState>=2&&!v.seeking&&v.videoWidth){im={v,naturalWidth:v.videoWidth,naturalHeight:v.videoHeight};CUT.lv=im}else im=CUT.lv||ims[j-1];if(!im)return}
    else if(!im||!im.complete||!im.naturalWidth)return;const src=im.v||im;const z=P.z[0]+(P.z[1]-P.z[0])*Math.min(1,q/P.d),
-   k=(P.fit?Math.min(w/im.naturalWidth,h/im.naturalHeight):Math.max(w/im.naturalWidth,h/im.naturalHeight))*z,dw=im.naturalWidth*k,dh=im.naturalHeight*k,sh=P.sh?P.sh*d*Math.max(0,1-q/.35):0;
+   k=(P.fit?Math.min(w/im.naturalWidth,h/im.naturalHeight):Math.max(w/im.naturalWidth,h/im.naturalHeight))*z,dw=im.naturalWidth*k,dh=im.naturalHeight*k,sh=(P.sh?P.sh*d*Math.max(0,1-q/.35):0)+CUT.shA*d*Math.max(0,1-(CUT.t-CUT.shT)/.35);
    g.globalAlpha=al;if(P.fit){const kb=Math.max(w/im.naturalWidth,h/im.naturalHeight)*1.1;g.drawImage(src,(w-im.naturalWidth*kb)/2,(h-im.naturalHeight*kb)/2,im.naturalWidth*kb,im.naturalHeight*kb);g.fillStyle='rgba(8,4,14,.72)';g.fillRect(0,0,w,h)}
    g.drawImage(src,P.f[0]*(w-dw)+(sh?rnd(-1,1)*sh:0),P.f[1]*(h-dh)+(sh?rnd(-1,1)*sh:0),dw,dh);g.globalAlpha=1};
  panel(i,pt,1);if(i>0&&pt<.09&&!p.fl)panel(i-1,acc,1-pt/.09);          /* быстрая склейка */
  const bar=h*.07*Math.min(1,CUT.t/.4);g.fillStyle='#000';g.fillRect(0,0,w,bar);g.fillRect(0,h-bar,w,bar);  /* кинорамка */
- let wa=Math.max(0,1-CUT.t/.4);if(p.fl)wa=Math.max(wa,1-pt/.2);if(wa>0){g.fillStyle='rgba(255,255,255,'+wa+')';g.fillRect(0,0,w,h)}
+ let wa=Math.max(0,1-CUT.t/.4);if(p.fl)wa=Math.max(wa,1-pt/.2);wa=Math.max(wa,.85*(1-(CUT.t-CUT.flT)/.2));if(wa>0){g.fillStyle='rgba(255,255,255,'+wa+')';g.fillRect(0,0,w,h)}
  if(!CUT.end&&CUT.t>=CUT.tot)cutFinish();
  if(CUT.end){CUT.end+=dt;g.fillStyle='rgba(0,0,0,'+Math.min(1,CUT.end/.35)+')';g.fillRect(0,0,w,h);if(CUT.end>.4){const f=CUT.done;cutStop();if(f)f()}}}
 function cutFinish(){if(CUT&&!CUT.end)CUT.end=.001}
