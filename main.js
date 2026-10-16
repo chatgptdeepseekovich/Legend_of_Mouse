@@ -1,4 +1,4 @@
-/*HS:8cef1ddc63*/
+/*HS:1cc81bf967*/
 
 /* ===== ПРИНУДИТЕЛЬНЫЙ ГОРИЗОНТАЛЬНЫЙ РЕЖИМ: если приложение держит экран вертикально, игра сама поворачивается на 90° ===== */
 let ROT=0;const ROOT=document.createElement('div');ROOT.id='root';
@@ -69,7 +69,7 @@ const SFX=(()=>{
    o.connect(g);g.connect(mg);o.start(t);o.stop(t+dur+.03)};
  const jit=()=>.94+Math.random()*.12;
  const HV=.65,LV=.38; /* громкость ударов и звука поражения */
- const MVOL={music_menu:.55,music_man:.32,music_shd:.6,mA:.5,mB:.5,mC:.5,music_mac:.42,music_ora:.42,music_bus:.45,music_worry:.42,music_good:.5}; /* громкость музыки по трекам */
+ const MVOL={music_mini:.5,music_menu:.55,music_man:.32,music_shd:.6,mA:.5,mB:.5,mC:.5,music_mac:.42,music_ora:.42,music_bus:.45,music_worry:.42,music_good:.5}; /* громкость музыки по трекам */
  /* герой попал по врагу; sh — враг-тень (у неё мышиные звуки, ниже тоном) */
  function heroHits(blk,heavy,sh){
   if(!ok('hh'))return;
@@ -261,7 +261,7 @@ function saveUI(){if($('#saveov'))return;const o=document.createElement('div');o
 function show(id){
  $$('.scr').forEach(s=>s.classList.toggle('on',s.id===id));
  if(id!=='mgp'&&typeof mgraf!=='undefined'){cancelAnimationFrame(mgraf);MG=null}
- if(id!=='game'){if(typeof dRelease==='function'){dRelease();bvRelease()}cancelAnimationFrame(raf);if(typeof cutStop==='function')cutStop();SFX.stopLose();if(started)SFX.music('music_menu')}
+ if(id!=='game'){if(typeof dRelease==='function'){dRelease();bvRelease()}cancelAnimationFrame(raf);if(typeof cutStop==='function')cutStop();SFX.stopLose();if(started)SFX.music(GIFT&&(id==='mg'||id==='mgp')&&typeof AU!=='undefined'&&AU.music_mini?'music_mini':'music_menu')}
  cancelAnimationFrame(mraf);if(id==='start'){dailyShow();mloop();if(started)mv.play().catch(()=>{})}else mv.pause();
  cancelAnimationFrame(maprf);if(id==='map'){buildMap();mapStart();diffLbl()}
  if(typeof glUpd==='function')glUpd();if(id==='about'&&GIFT)$('#albbtn').classList.add('on');if(id==='about'){const ad=$('#adaily');if(ad){if(GIFT&&DAILY.length){const day=Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);ad.innerHTML='<small>Комплимент дня</small>'+DAILY[day%DAILY.length];ad.classList.add('on')}else ad.classList.remove('on')}const ab=$('#about');if(BGI.bg_about&&!ab.dataset.bg){ab.dataset.bg=1;ab.style.backgroundImage='url('+BGI.bg_about.src+')'}if(!abRaf)abRaf=requestAnimationFrame(aboutDraw)}
@@ -1040,6 +1040,17 @@ const MGT=[
  {k:'laser2',g:'laser',v:25,t:'Укротительница Славика',c:'Двадцать пять рыбок и почти целые вазы. Чудо.'},
  {k:'climb1',g:'climb',v:300,t:'Покорительница шкафов',c:'Славик забрался туда, откуда его не достать пылесосом.'},
  {k:'climb2',g:'climb',v:800,t:'Выше люстры',c:'Восемьсот очков высоты. Славик теперь живёт под потолком.'}];
+/* публичная версия: игровые титулы без личных комплиментов */
+if(!GIFT){
+ Object.assign(TTL,{mac:{t:'Гроза Макчикенов',c:'Макчикен-монстр повержен.'},ora:{t:'Мышь Неповторимая',c:'Лиса-Оракул раскрыла последнюю карту.'},
+  bus:{t:'Рыцарь Пушистой Ярости',c:'Бусильда признала поражение.'},man:{t:'Упрямее Манула',c:'Манул Несдающийся всё-таки сдался.'},
+  shd:{t:'Победившая Себя',c:'Тень мыши рассыпалась осколками.'},inf:{t:'Драконоборец',c:'Инфляций Ужасный повержен, королевство спасено.'}});
+ B.forEach(b=>{if(TTL[b.id])b.t=TTL[b.id].t});
+ SECR.forEach(x=>{if(x.k==='nohelp'){x.t='Одиночка';x.c='Весь сюжет пройден без помощи союзника.'}if(x.k==='fury'){x.t='Ярость во плоти';x.c='Все боссы побеждены на сложности «Ярость Графини».'}});
+ const G2={ball:'Отбей шары Манула',find:'Найди настоящую мышь',cards:'Пройди уровни',coins:'Собери монеты',cut:'Набери очки нарезки',sleep:'Утащи сокровища',laser:'Собери рыбок',climb:'Набери высоту'};
+ const NM={ball2:'Непробиваемая',find2:'Сквозь зеркала',cards1:'Гостья Оракула',cards2:'Карты не лгут',coins1:'Казначей',coins2:'Гроза инфляции',cut1:'Повар Левенцова',cut2:'Мастер нарезки',sleep1:'Тише мыши',sleep2:'Тихие лапки',laser1:'Повелитель точки',laser2:'Укротитель Славика',climb1:'Покоритель шкафов',climb2:'Выше люстры'};
+ MGT.forEach(x=>{if(NM[x.k])x.t=NM[x.k];x.c=G2[x.g]+': '+x.v+(x.g==='cards'?' уровн'+(x.v<5?'я':'ей'):'')+'.'});
+ FINAL_MSG='Королевство спасено.\nСпасибо за игру!'}
 function mgtCheck(m,sc,kind){P.mgt=P.mgt||{};const nw=MGT.filter(x=>x.g===m.id&&!P.mgt[x.k]&&(m.rec==='min'?kind==='win'&&sc<=x.v:sc>=x.v));
  nw.forEach(x=>P.mgt[x.k]=1);if(nw.length)save();return nw}
 function ttlCount(){const sec=SECR.filter(x=>!x.gift||GIFT),all=B.length+sec.length+MGT.length;
